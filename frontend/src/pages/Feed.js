@@ -168,26 +168,19 @@ const Feed = () => {
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
           />
-
-          <label htmlFor="image-upload" className="upload-label">
-            📷 Choose Image
-          </label>
+          <label htmlFor="image-upload" className="upload-label">📷 Choose Image</label>
           <input
             id="image-upload"
             type="file"
             accept="image/*"
             onChange={handleImageChange}
           />
-
           {preview && (
             <div className="image-preview">
               <img src={preview} alt="Preview" />
             </div>
           )}
-
-          <button className="post-btn" onClick={handleCreatePost}>
-            🚀 Post
-          </button>
+          <button className="post-btn" onClick={handleCreatePost}>🚀 Post</button>
         </div>
       ) : (
         <div className="no-posts">
@@ -206,7 +199,7 @@ const Feed = () => {
           <div key={post._id} className="post animated">
             <div className="post-header">
               <Link to={`/user/${post.username}`} className="user-tag">
-                @{post.username}
+                {post.username}
               </Link>
               {user?.username === post.username && (
                 <button
@@ -214,7 +207,7 @@ const Feed = () => {
                   title="Delete post"
                   onClick={() => handleDelete(post._id)}
                 >
-                  <span role="img" aria-label="delete">🗑️</span>
+                  🗑️
                 </button>
               )}
             </div>
@@ -237,7 +230,9 @@ const Feed = () => {
               <div className="comments-section">
                 {post.comments.map((comment, index) => (
                   <div key={index} className="comment">
-                    <strong>@{comment.username}</strong>: {comment.text}
+                    <Link to={`/user/${comment.username}`} className="comment-username">
+                      {comment.username}
+                    </Link>: {comment.text}
                   </div>
                 ))}
               </div>

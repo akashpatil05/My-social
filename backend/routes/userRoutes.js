@@ -4,7 +4,7 @@ const User = require('../models/User');
 const Post = require('../models/Post');
 const verifyToken = require('../middleware/auth');
 
-// ✅ Get user profile with follow info
+// ✅ Get user profile with follow info and posts using userId
 router.get('/:username', verifyToken, async (req, res) => {
   try {
     const { username } = req.params;
@@ -13,7 +13,8 @@ router.get('/:username', verifyToken, async (req, res) => {
     const user = await User.findOne({ username }).lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const posts = await Post.find({ username }).sort({ createdAt: -1 });
+    // 👇 Fetch posts using user._id
+    const posts = await Post.find({ userId: user._id }).sort({ createdAt: -1 });
 
     const isFollowing = user.followers.some(
       (id) => id.toString() === currentUserId

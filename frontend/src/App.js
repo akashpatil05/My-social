@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Feed from "./pages/Feed";
-import Profile from "./pages/Profile"; // ✅ Add this import
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const AppLayout = () => {
@@ -22,8 +22,8 @@ const AppLayout = () => {
         <Route path="/" element={<Feed />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Dashboard />} />
-        <Route path="/user/:username" element={<Profile />} /> {/* ✅ New Route */}
+        <Route path="/profile" element={<Dashboard />} /> {/* Own profile */}
+        <Route path="/profile/:username" element={<Profile />} /> {/* Other profiles */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

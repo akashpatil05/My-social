@@ -1,7 +1,7 @@
-// 📁 backend/routes/postRoutes.js
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
+const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 // 🔐 Middleware: Authenticate JWT token
@@ -13,7 +13,7 @@ const authenticateToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user info
+    req.user = decoded; // Attach user info to request
     next();
   } catch (err) {
     return res.status(403).json({ message: 'Invalid Token' });
@@ -39,8 +39,13 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 
   try {
+    // Fetch user info from DB using ID from JWT
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
     const newPost = new Post({
-      username: req.user.username,
+      userId: user._id,
+      username: user.username,
       content,
       image,
     });
@@ -56,7 +61,6 @@ router.post('/', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
     if (post.username !== req.user.username) {

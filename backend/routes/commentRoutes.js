@@ -1,37 +1,54 @@
 // 📁 backend/routes/commentRoutes.js
 const express = require('express');
 const router = express.Router();
-const verifyToken = require('../middleware/auth');
-const Post = require('../models/Post');
+const Comment = require('../models/Comment');
+const jwt = require('jsonwebtoken');
 
-// 🟦 GET comments for a post
+// 🔐 Middleware: Authenticate JWT token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Access Denied: No Token' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: 'Invalid Token' });
+  }
+};
+
+// 🔓 Get all comments for a specific post (Public)
 router.get('/:postId', async (req, res) => {
   try {
-    const post = await Post.findById(req.params.postId);
-    return res.json(post.comments || []);
-  } catch (e) {
-    return res.status(500).json({ message: 'Error fetching comments' });
+    const comments = await Comment.find({ postId: req.params.postId }).sort({ createdAt: 1 });
+    res.json(comments);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching comments' });
   }
 });
 
-// 🟩 POST a new comment
-router.post('/:postId', verifyToken, async (req, res) => {
+// 🔐 Create a comment (Private)
+router.post('/:postId', authenticateToken, async (req, res) => {
   const { commentText } = req.body;
-  if (!commentText.trim()) return res.status(400).json({ message: 'Comment cannot be empty' });
+  const { id: userId, username } = req.user;
+
+  if (!commentText) return res.status(400).json({ message: 'Comment text required' });
 
   try {
-    const post = await Post.findById(req.params.postId);
-    if (!post) return res.status(404).json({ message: 'Post not found' });
-
-    const comment = {
-      username: req.user.username,
+    const newComment = new Comment({
+      postId: req.params.postId,
+      userId,
+      username,
       text: commentText,
-    };
-    post.comments.push(comment);
-    await post.save();
-    return res.status(201).json(comment);
-  } catch (e) {
-    return res.status(500).json({ message: 'Failed to add comment' });
+    });
+
+    const saved = await newComment.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to add comment' });
   }
 });
 

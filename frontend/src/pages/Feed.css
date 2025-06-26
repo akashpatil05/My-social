@@ -182,9 +182,22 @@
   background-color: #16a34a;
 }
 
-/* Empty Feed */
+
 .no-posts {
   text-align: center;
   padding: 2rem 0;
   color: #6b7280;
+}
+
+.user-tag,
+.comment-username {
+  text-decoration: none;
+  font-weight: 600;
+  color: #1a1a1a;
+  transition: color 0.2s;
+}
+
+.user-tag:hover,
+.comment-username:hover {
+  color: #007bff;
 }
